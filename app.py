@@ -1,15 +1,35 @@
-
 import streamlit as st
+import os
+from datetime import datetime
 
-st.title("نموذج تفاعلي حسب الإجابة")
+# قائمة الرموز الصالحة (كلمة السر) المرتبطة بالمذكرات
+valid_codes = {
+    "CODE123": "مذكرة الطالب أحمد",
+    "XYZ789": "مذكرة الطالبة سارة"
+}
 
-answer = st.text_input("هل ترغب في المتابعة؟ (أدخل 'نعم' أو 'لا')")
+st.title("إيداع مذكرة التخرج")
 
-if answer.strip().lower() == "نعم":
-    st.success("أهلاً بك في القسم الثاني ✅")
-    st.write("هذا محتوى القسم الثاني الخاص بالمتابعة.")
-elif answer.strip().lower() == "لا":
-    st.warning("تم تحويلك إلى قسم التوقف ⛔")
-    st.write("هذا محتوى القسم الثالث.")
-elif answer:
-    st.error("الرجاء إدخال 'نعم' أو 'لا' فقط.")
+code = st.text_input("أدخل كلمة السر الخاصة بالمذكرة:")
+
+if code:
+    if code in valid_codes:
+        st.success(f"الكود صحيح: {valid_codes[code]}. يمكنك رفع ملف المذكرة الآن.")
+        
+        uploaded_file = st.file_uploader("اختر ملف المذكرة (PDF)", type=["pdf"])
+        
+        if uploaded_file is not None:
+            save_dir = "uploaded_theses"
+            os.makedirs(save_dir, exist_ok=True)
+            
+            filename = f"{code}_{uploaded_file.name}"
+            save_path = os.path.join(save_dir, filename)
+            
+            with open(save_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            
+            deposit_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            st.success(f"تم رفع المذكرة بنجاح بتاريخ {deposit_date}. شكراً لك.")
+            
+    else:
+        st.error("كلمة السر غير صحيحة، يرجى المحاولة مرة أخرى.")
